@@ -8,7 +8,6 @@
 #include <clocale>
 #include <string>
 
-
 using namespace std;
 
 struct Tree{
@@ -19,18 +18,17 @@ struct Tree{
 	struct Tree *right;
 };
 
-
-Tree* get_memory_tree(Tree *parent, int value_int, char value_ch)
+Tree* get_memory_tree(Tree *parent, const int value_int, const char value_ch)
 {
 	Tree* buf = (Tree*)malloc(sizeof(Tree));
 	buf->left = buf->right = nullptr;
-	buf->data_int = value_int; //ƒобавить занесени€ значени€ по типу
+	buf->data_int = value_int; 
 	buf->data_ch = value_ch;
 	buf->parent = parent;
 	return buf;
 }
 
-int insert_tree(Tree **head, int  value_int, char value_ch){
+int insert_tree(Tree **head, const int  value_int, const char value_ch){
 	Tree *buf = nullptr;
 	Tree *ins_val = nullptr;
 	if (*head == nullptr){
@@ -66,7 +64,7 @@ int insert_tree(Tree **head, int  value_int, char value_ch){
 	return 0;
 }
 
-Tree* get_by_value(Tree *serch, int value_int, char value_ch){
+Tree* get_by_value(Tree *serch, const int value_int, const char value_ch){
 	while(serch)
 	{
 			if (serch->data_int > value_int && serch->data_ch > value_ch )
@@ -87,7 +85,6 @@ Tree* get_by_value(Tree *serch, int value_int, char value_ch){
 	return nullptr;
 }
 
-//поиск максимального значени€
 Tree* get_max_node(Tree *root) {
 	while (root->right) {
 		root = root->right;
@@ -96,15 +93,14 @@ Tree* get_max_node(Tree *root) {
 }
 
 int remove_node_by_ptr_int(Tree *target) {
-	
-		if (target->left && target->right) {
-			Tree *local_max = get_max_node(target->left);
-			target->data_int = local_max->data_int;
-			target->data_ch = local_max->data_ch;
-			remove_node_by_ptr_int(local_max);
-			return 0;
-		}
-	 else if (target->left) {
+	if (target->left && target->right) {
+		Tree *local_max = get_max_node(target->left);
+		target->data_int = local_max->data_int;
+		target->data_ch = local_max->data_ch;
+		remove_node_by_ptr_int(local_max);
+		return 0;
+	}
+	else if (target->left) {
 		if (target == target->parent->left) {
 			target->parent->left = target->left;
 		}
@@ -132,7 +128,7 @@ int remove_node_by_ptr_int(Tree *target) {
 	return 0;
 }
 
-int delete_value(Tree *root, int value_int, char value_ch) {
+int delete_value(Tree *root, const int value_int, const char value_ch) {
 	Tree *target = get_by_value(root, value_int, value_ch);
 	if(target != nullptr)
 	{
@@ -157,19 +153,16 @@ int clear_descendant(Tree *&root)
 	return 0;
 }
 
-int clear_tree(Tree* root)
+int clear_tree(Tree* &root)
 {
 	clear_descendant(root);
+	root = nullptr;
 	return 0;
 }
 
-int print_tree(Tree *root, const char *dir, int level) {
+int print_tree(Tree *root, const char *dir, const int level) {
 	if (root != nullptr) {
-		if(root->data_int != NULL && root->data_ch != NULL)
-		{
-			printf("lvl %d %s = %d\n", level, dir, root->data_int);
-			printf("lvl %d %s = %c\n", level, dir, root->data_ch);
-		} 
+		printf("lvl %d %s = %d | %c\n", level, dir, root->data_int, root->data_ch);
 		if(root-> left != nullptr)
 		{
 			print_tree(root->left, "left", level + 1);
@@ -187,17 +180,16 @@ int print_tree(Tree *root, const char *dir, int level) {
 
 int check_correctness_int()
 {
-	int n = 0;
+	auto n = 0;
 	cout << "¬ведите целолое число от (-1000; 1000](целое число): ";
 	string input;
 	do {
 		cin.clear();
 		cin >> input;
-		for (char i : input)
+		for (auto i : input)
 		{
 			if (isalpha(i))
 			{
-				//cout << "¬ведите целолое число от [-1000; 1000](целое число): ";
 				n = -1001;
 				break;
 			}
@@ -210,7 +202,7 @@ int check_correctness_int()
 		{
 			cout << "¬ведите целолое число от (-1000; 1000](целое число): ";
 		}
-		while (cin.get() != '\n'); //очистить поток
+		while (cin.get() != '\n'); //clear
 	} while (n < -999 || n > 1000);
 	return n;
 }
@@ -229,12 +221,12 @@ char check_correctness_char()
 		else {
 			return input[0];
 		}
-		while (cin.get() != '\n'); //очистить поток
+		while (cin.get() != '\n'); //clear
 	} while (input.length() != 1);
 	return 0;
 }
 
-int print_menu()
+int print_menu_text()
 {
 	system("cls");
 	cout << "Ѕинарное дерево поиска:\n" <<
@@ -245,15 +237,14 @@ int print_menu()
 	return 0;
 }
 
-int get_point() {
+int print_menu() {
 	Tree *root = nullptr;
 	do {
 		auto flag = true, flag_insert = false, flag_delete = false, flag_print = false, flag_clear = false;
-		char point;
-		print_menu();
+		print_menu_text();
 		while (flag)
 		{
-			point = _getch();
+			const char point = _getch();
 			switch (point)
 			{
 			case ('1'):
@@ -276,8 +267,8 @@ int get_point() {
 		if (flag_insert)
 		{
 			system("cls");
-			int val_int = check_correctness_int();
-			char val_ch = check_correctness_char();
+			const int val_int = check_correctness_int();
+			const char val_ch = check_correctness_char();
 			insert_tree(&root, val_int, val_ch);
 			flag_insert = false;
 			system("pause");
@@ -285,8 +276,8 @@ int get_point() {
 		else if (flag_delete)
 		{
 			system("cls");
-			int val_int = check_correctness_int();
-			char val_ch = check_correctness_char();
+			const int val_int = check_correctness_int();
+			const char val_ch = check_correctness_char();
 			delete_value(root, val_int, val_ch);
 			flag_delete = false;
 			system("pause");
@@ -314,6 +305,6 @@ int get_point() {
 int main()
 {
 	setlocale(LC_ALL, "");
-	get_point();
+	print_menu();
     return 0;
 }
