@@ -5,144 +5,140 @@
 #include <iostream>
 #include <cstdlib>
 #include <conio.h>
-#include <clocale>
 #include <string>
+#include <windows.h>
 
 using namespace std;
 
-struct Tree{
+struct BstNode{
 	int data_int;
 	char data_ch;
-	struct Tree *parent;
-	struct Tree *left;
-	struct Tree *right;
+	BstNode *left;
+	BstNode *right;
 };
 
-Tree* get_memory_tree(Tree *parent, const int value_int, const char value_ch)
+BstNode* get_new_node(const int value_int, const char value_ch)
 {
-	Tree* buf = (Tree*)malloc(sizeof(Tree));
-	buf->left = buf->right = nullptr;
-	buf->data_int = value_int; 
-	buf->data_ch = value_ch;
-	buf->parent = parent;
-	return buf;
+	BstNode* new_node = (BstNode*)malloc(sizeof(BstNode));
+	new_node->data_int = value_int;
+	new_node->data_ch = value_ch;
+	new_node->left = new_node->right = nullptr;
+	return new_node;
 }
 
-int insert_tree(Tree **head, const int  value_int, const char value_ch){
-	Tree *buf = nullptr;
-	Tree *ins_val = nullptr;
-	if (*head == nullptr){
-		*head = get_memory_tree(nullptr, value_int, value_ch);
-		return 0;
-	}
-	buf = *head;
-	while (buf) {
-		if (value_int < buf->data_int || value_ch < buf->data_ch) {
-			if (buf->left) {
-				buf = buf->left;
-				continue;
-			}
-			else {
-				buf->left = get_memory_tree(buf, value_int, value_ch);
-				return 0;
-			}
-		}
-		else if (value_int > buf->data_int || value_ch > buf->data_ch ) {
-			if (buf->right) {
-				buf = buf->right;
-				continue;
-			}
-			else {
-				buf->right = get_memory_tree(buf, value_int, value_ch);
-				return 0;
-			}
-		}
-		else {
-			exit(2);
-		}
-	}
-	return 0;
-}
-
-Tree* get_by_value(Tree *serch, const int value_int, const char value_ch){
-	while(serch)
+BstNode* insert_values(BstNode *root, const int  value_int, const char value_ch) {
+	if (root == nullptr)
 	{
-			if (serch->data_int > value_int && serch->data_ch > value_ch )
-			{
-				serch = serch->left;
-				continue;
-			}
-			else if (serch->data_int < value_int && serch->data_ch < value_ch)
-			{
-				serch = serch->right;
-				continue;
-			}
-			else
-			{
-				return serch;
-			}
+		root = get_new_node(value_int, value_ch);
 	}
-	return nullptr;
-}
-
-Tree* get_max_node(Tree *root) {
-	while (root->right) {
-		root = root->right;
+	else if(value_int < root->data_int)
+	{
+		root->left = insert_values(root->left, value_int, value_ch);
+	} 
+	else if (value_int > root->data_int)
+	{
+		root->right = insert_values(root->right, value_int, value_ch);
+	}
+	else
+	{
+		if(value_ch < root->data_ch)
+		{
+			root->left = insert_values(root->left, value_int, value_ch);
+		} else
+		{
+			root->right = insert_values(root->right, value_int, value_ch);
+		}
 	}
 	return root;
 }
 
-int remove_node_by_ptr_int(Tree *target) {
-	if (target->left && target->right) {
-		Tree *local_max = get_max_node(target->left);
-		target->data_int = local_max->data_int;
-		target->data_ch = local_max->data_ch;
-		remove_node_by_ptr_int(local_max);
-		return 0;
+bool search_values(BstNode* root, const int value_int, const char value_ch)
+{
+	if(root == nullptr)
+	{
+		return false;
+	} 
+	else if(root->data_int == value_int && root->data_ch == value_ch)
+	{
+		return true;
 	}
-	else if (target->left) {
-		if (target == target->parent->left) {
-			target->parent->left = target->left;
-		}
-		else {
-			target->parent->right = target->left;
-		}
+	else if(value_int < root->data_int)
+	{
+		search_values(root->left, value_int, value_ch);
 	}
-	else if (target->right) {
-		if (target == target->parent->right) {
-			target->parent->right = target->right;
-		}
-		else {
-			target->parent->left = target->right;
-		}
+	else if (value_int > root->data_int)
+	{
+		search_values(root->right, value_int, value_ch);
 	}
-	else {
-		if (target == target->parent->left) {
-			target->parent->left = nullptr;
-		}
-		else {
-			target->parent->right = nullptr;
+	else if (value_int == root->data_int)
+	{
+		if(value_ch < root->data_ch)
+		{
+			search_values(root->left, value_int, value_ch);
+		} else
+		{
+			search_values(root->right, value_int, value_ch);
 		}
 	}
-	free(target);
-	return 0;
 }
 
-int delete_value(Tree *root, const int value_int, const char value_ch) {
-	Tree *target = get_by_value(root, value_int, value_ch);
-	if(target != nullptr)
+BstNode* find_min(BstNode *root)
+{
+	if (root->left == nullptr)
 	{
-		remove_node_by_ptr_int(target);
-		cout << "Элемент удален" << endl;
+		return root;
+	}
+	return find_min(root->left);
+}
+
+BstNode* delete_values(BstNode* root, const int value_int, const char value_char)
+{
+	if(root == nullptr)
+	{
+		return root;
+	}
+	else if (value_int < root->data_int)
+	{
+		root->left = delete_values(root->left, value_int, value_char);
+	} 
+	else if (value_int > root->data_int)
+	{
+		root->right = delete_values(root->right, value_int, value_char);
 	}
 	else
 	{
-		cout << "Такого элемента нет" << endl;
+		if(root->left == nullptr && root->right == nullptr) //нет детей
+		{
+			free(root);
+			root = nullptr;
+		}
+		else if (root->left == nullptr) //1 ребенок
+		{
+			BstNode *temp = root;
+			root = root->right;
+			free(temp);
+			return root;
+		}
+		else if (root->right == nullptr) //1 ребенок
+		{
+			BstNode *temp = root;
+			root = root->left;
+			free(temp);
+			return root;
+		}
+		else
+		{
+			BstNode* temp = find_min(root->right);
+			root->data_int = temp->data_int;
+			root->data_ch = temp->data_ch;
+			root->right = delete_values(root->right, temp->data_int, temp->data_ch);
+		}
 	}
-	return 0;
+	return root;
 }
 
-int clear_descendant(Tree *&root)
+
+BstNode* clear_descendant(BstNode* root)
 {
 	if (root != nullptr)
 	{
@@ -150,80 +146,58 @@ int clear_descendant(Tree *&root)
 		clear_descendant(root->right);
 		free(root);
 	}
-	return 0;
+	return root;
 }
 
-int clear_tree(Tree* &root)
+BstNode* clear_tree(BstNode* root)
 {
-	clear_descendant(root);
+	root = clear_descendant(root);
 	root = nullptr;
-	return 0;
+	return root;
 }
 
-int print_tree(Tree *root, const char *dir, const int level) {
+int print_tree(BstNode *root, const char *dir, const int level) {
 	if (root != nullptr) {
 		printf("lvl %d %s = %d | %c\n", level, dir, root->data_int, root->data_ch);
-		if(root-> left != nullptr)
-		{
-			print_tree(root->left, "left", level + 1);
-		}
-		if(root->right != nullptr)
-		{
-			print_tree(root->right, "right", level + 1);
-		}
-	} else
-	{
-		cout << "Дерево пустое" << endl;
+		print_tree(root->left, "left", level + 1);
+		print_tree(root->right, "right", level + 1);
 	}
 	return 0;
 }
 
 int check_correctness_int()
 {
-	auto n = 0;
-	cout << "Введите целолое число от (-1000; 1000](целое число): ";
-	string input;
-	do {
-		cin.clear();
+	bool check = true;
+	int input;
+	do
+	{
+		check = true;
+		cout << "Введите число: ";
 		cin >> input;
-		for (auto i : input)
+		if (!cin.good())
 		{
-			if (isalpha(i))
-			{
-				n = -1001;
-				break;
-			}
-			else
-			{
-				n = atoi(input.c_str());
-			}
+			cin.ignore(255, '\n');
+			check = false;
 		}
-		if (n < -999 || n > 1000)
-		{
-			cout << "Введите целолое число от (-1000; 1000](целое число): ";
+		cin.clear();
+		if (cin.peek() != 32 && cin.peek() != '\n') {
+			cin.ignore(255, '\n');
+			check = false;
 		}
-		while (cin.get() != '\n'); //clear
-	} while (n < -999 || n > 1000);
-	return n;
+		else cin.ignore(255, '\n');
+	} while (!check); 
+	cin.clear();
+	return input;
 }
 
 char check_correctness_char()
 {
-	cout << "Введите один символ: ";
+	cout << "Введите один символ или больше (занесется ТОЛЬКО ПЕРВЫЙ символ): ";
 	string input;
-	do {
-		cin.clear();
-		cin >> input;
-		if (input.length() != 1)
-		{
-			cout << "Введите один символ: ";
-		}
-		else {
-			return input[0];
-		}
-		while (cin.get() != '\n'); //clear
-	} while (input.length() != 1);
-	return 0;
+	cin.clear();
+	cin >> input;
+	while (cin.get() != '\n'); //clear
+	return input[0];
 }
 
 int print_menu_text()
@@ -238,7 +212,7 @@ int print_menu_text()
 }
 
 int print_menu() {
-	Tree *root = nullptr;
+	BstNode* root = nullptr;
 	do {
 		auto flag = true, flag_insert = false, flag_delete = false, flag_print = false, flag_clear = false;
 		print_menu_text();
@@ -269,16 +243,30 @@ int print_menu() {
 			system("cls");
 			const int val_int = check_correctness_int();
 			const char val_ch = check_correctness_char();
-			insert_tree(&root, val_int, val_ch);
+			root = insert_values(root, val_int, val_ch);
 			flag_insert = false;
 			system("pause");
 		}
 		else if (flag_delete)
 		{
 			system("cls");
-			const int val_int = check_correctness_int();
-			const char val_ch = check_correctness_char();
-			delete_value(root, val_int, val_ch);
+			if (root)
+			{
+				const int val_int = check_correctness_int();
+				const char val_ch = check_correctness_char();
+				if (search_values(root, val_int, val_ch))
+				{
+					root = delete_values(root, val_int, val_ch);
+				}
+				else
+				{
+					cout << "Элемент не найден" << endl;
+				}
+			}
+			else
+			{
+				cout << "Дерево не заполнено" << endl;
+			}
 			flag_delete = false;
 			system("pause");
 			
@@ -286,15 +274,29 @@ int print_menu() {
 		else if (flag_print)
 		{
 			system("cls");
-			print_tree(root, "root", 0);
+			if (root)
+			{
+				print_tree(root, "root", 0);
+			}
+			else
+			{
+				cout << "Дерево пустое" << endl;
+			}
 			system("pause");
 			flag_print = false;
 		}
 		else if (flag_clear)
 		{
-			clear_tree(root);
 			system("cls");
-			cout << "Дерево удалено" << endl;
+			if (root)
+			{
+				root = clear_tree(root);
+				cout << "Дерево удалено" << endl;
+			}
+			else
+			{
+				cout << "Дерево не заполнено. Его нельзя удалить" << endl;
+			}
 			flag_delete = false;
 			system("pause");
 		}
@@ -304,7 +306,8 @@ int print_menu() {
 
 int main()
 {
-	setlocale(LC_ALL, "");
+	SetConsoleCP(1251); // Ввод с консоли в кодировке 1251
+	SetConsoleOutputCP(1251);
 	print_menu();
     return 0;
 }
